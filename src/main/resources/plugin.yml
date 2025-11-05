@@ -1,0 +1,12 @@
+name: TreasureHunt
+version: '1.0-SNAPSHOT'
+main: com.github.joaoalberis.treasurehunt.TreasureHunt
+api-version: '1.20'
+authors: [ MrJoao(Albis) ]
+website: https://github.com/joaoalberis
+commands:
+  treasure:
+    aliases: [tc]
+    description: "Main command for Treasure Hunt"
+    usage: /treasure <subcommand>
+

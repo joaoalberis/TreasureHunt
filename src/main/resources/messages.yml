@@ -1,0 +1,54 @@
+prefix: "&6TreasureHunt » &e"
+
+no-permission: "&cYou don't have permission to use this command."
+only-player: "&cOnly players can use this command."
+unknown-command: "&cUnknown subcommand. Use &e/tc help&c."
+command-error: "&cAn error occurred while executing this command. Check console."
+
+startup:
+  success: "&aTreasureHunt successfully started!"
+
+database:
+  close: "&7Database connection closed."
+
+create:
+  usage: "&cUsage: /tc create <id> <command>"
+
+pagination:
+  info: "&7Page {page} of {pages}"
+  next: "&eUse /tc list {next} to view the next page."
+
+
+treasure:
+  created: "&aTreasure created successfully!"
+  create-mode: "&eCreate mode activated. Right-click a block within 120 seconds to set the treasure location."
+  exists: "&cThere is already a treasure at that location."
+  not-found: "&cNo treasure found with ID &e{id}&c."
+  deleted: "&aTreasure &e{id}&a deleted successfully."
+  claimed: "&aYou have claimed the treasure &e{id}&a!"
+  already-claimed: "&cYou have already claimed this treasure!"
+  list-empty: "&7No treasures found."
+  list-header: "&6==== &eTreasure List &6===="
+  list-entry: "&6➤ &eID: &f{id} &8| &eWorld: &f{world} &8| &eCoords: &f[{x}, {y}, {z}]"
+  list-footer: "&6============================"
+  created-info: "&7ID: &f{id} &7Location: &f{x}, {y}, {z} &7(world: {world})"
+  created-info-id: "&7ID: &f{id}"
+  created-info-command: "&7Command: &f{command}"
+
+completed:
+  empty: "&7No players have claimed this treasure yet."
+  header: "&6==== &ePlayers who claimed &6({count}) &7- &ePage {page}/{pages} &6===="
+  entry: "&6➤ &e{name} &8({uuid}) &7- &e{date}"
+  usage: "&cUsage: /tc completed <id> [page]"
+  detail-title: "&6---- {name} ----"
+  uuid-line: "&7UUID: &f{uuid}"
+  clipboard-copied: "&aUUID copied to clipboard (if supported)."
+  usage-hint: "&7Use: /{label} completed {id} <page> to view other pages."
+
+generic:
+  error-loading: "&cAn error occurred while loading data. Check console."
+  not-in-context: "&cError: treasure not found in context."
+  internal-error: "&cInternal error: no treasure selected."
+  cancelled: "&eOperation cancelled."
+  unknown: "Unknown"
+  error-saving: "&cAn error occurred while saving the treasure. Check console for details."

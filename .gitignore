@@ -1,0 +1,53 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+*.iws
+*.ipr
+
+# Logs and runtime
+logs/
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Minecraft server test folders
+run/
+cache/
+test-server/
+server/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Backup and temporary files
+*.orig
+*.rej
+*~
+
+# Plugin local configs
+*.yml~
+config/
+plugins/
+
+# Gradle cache
+.gradle/
+.gradle-cache/
+build/
+
+# Exclude build outputs (jar generated)
+build/libs/
