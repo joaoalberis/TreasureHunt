@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TreasureCreate implements TreasureBaseCommand {
-    public static final Map<UUID, PendingCreation> pendingCreations = new ConcurrentHashMap<>();
+    private static final Map<UUID, PendingCreation> pendingCreations = new ConcurrentHashMap<>();
     private final TreasureCache cache;
     private final Plugin plugin;
 
@@ -61,16 +61,38 @@ public class TreasureCreate implements TreasureBaseCommand {
             MessageUtil.send(player, "treasure.exists");
             return true;
         }
-        pendingCreations.put(player.getUniqueId(), new PendingCreation(id, command));
+        putPendingCreation(player.getUniqueId(), new PendingCreation(id, command));
 
         UUID uuid = player.getUniqueId();
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-                () -> pendingCreations.remove(uuid), 20L * 120);
+                () -> removePendingCreation(uuid), 20L * 120);
 
 
         MessageUtil.send(player, "treasure.create-mode");
         MessageUtil.send(player, "treasure.created-info-id", Map.of("id", id));
         MessageUtil.send(player, "treasure.created-info-command", Map.of("command", command));
         return true;
+    }
+
+    public static Optional<PendingCreation> getPendingCreation(UUID playerUUID) {
+        return Optional.ofNullable(pendingCreations.get(playerUUID));
+    }
+
+    public static void putPendingCreation(UUID player, PendingCreation creation) {
+        if (player == null || creation == null) return;
+        pendingCreations.put(player, creation);
+    }
+
+    public static void removePendingCreation(UUID player) {
+        if (player == null) return;
+        pendingCreations.remove(player);
+    }
+
+    public static boolean hasPendingCreation(UUID player) {
+        return player != null && pendingCreations.containsKey(player);
+    }
+
+    public static int pendingCount() {
+        return pendingCreations.size();
     }
 }

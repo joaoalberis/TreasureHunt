@@ -18,6 +18,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -39,8 +40,10 @@ public class RightClickTreasure implements Listener {
         if (event.getClickedBlock() == null) return;
 
         Player player = event.getPlayer();
-        PendingCreation pendingCreation = TreasureCreate.pendingCreations.get(player.getUniqueId());
-        if (pendingCreation == null) return;
+        Optional<PendingCreation> optPendingCreation = TreasureCreate.getPendingCreation(player.getUniqueId());
+        if (optPendingCreation.isEmpty()) return;
+
+        PendingCreation pendingCreation = optPendingCreation.get();
 
         String worldName = player.getWorld().getName();
         int x = event.getClickedBlock().getX();
@@ -50,7 +53,7 @@ public class RightClickTreasure implements Listener {
         String posKey = DatabaseManager.posKey(worldName, x, y, z);
         if (cache.getByPos(worldName, x, y, z).isPresent()) {
             MessageUtil.send(player, "treasure.exists");
-            TreasureCreate.pendingCreations.remove(player.getUniqueId());
+            TreasureCreate.removePendingCreation(player.getUniqueId());
             event.setCancelled(true);
             return;
         }
@@ -62,7 +65,7 @@ public class RightClickTreasure implements Listener {
                 dbManager.upsertTreasure(model.getId(), worldName, x, y, z, model.getCommand());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     cache.put(model);
-                    TreasureCreate.pendingCreations.remove(player.getUniqueId());
+                    TreasureCreate.removePendingCreation(player.getUniqueId());
                     MessageUtil.send(player, "treasure.created");
                     MessageUtil.send(player, "treasure.created-info", Map.of(
                             "id", model.getId(),
@@ -76,7 +79,7 @@ public class RightClickTreasure implements Listener {
                 plugin.getLogger().severe("Failed to save treasure " + model.getId() + " to DB: " + ex.getMessage());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     MessageUtil.send(player, "generic.error-saving");
-                    TreasureCreate.pendingCreations.remove(player.getUniqueId());
+                    TreasureCreate.removePendingCreation(player.getUniqueId());
                 });
             }
         });
@@ -126,7 +129,7 @@ public class RightClickTreasure implements Listener {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 cache.addClaim(uuid, treasureId);
 
-                String command = treasure.getCommand() == null ? "" : treasure.getCommand().trim();;
+                String command = treasure.getCommand() == null ? "" : treasure.getCommand().trim();
                 if (command.startsWith("/")) command = command.substring(1);
                 if (!command.isBlank()) {
                     command = command.replace("%player%", player.getName());
