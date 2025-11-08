@@ -1,4 +1,4 @@
-package com.github.joaoalberis.treasurehunt.gui;
+package com.github.joaoalberis.treasurehunt.gui.completed;
 
 import com.github.joaoalberis.treasurehunt.TreasureCache;
 import com.github.joaoalberis.treasurehunt.database.DatabaseManager;
@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -33,34 +33,36 @@ public class TreasureCompletedListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
-        Player player = (Player) event.getWhoClicked();
+        Inventory inventory = event.getInventory();
+        if (inventory.getHolder() instanceof TreasureCompletedInventory myInventory) {
+            if (!(event.getWhoClicked() instanceof Player)) return;
+            Player player = (Player) event.getWhoClicked();
 
-        String rawTitle = event.getView().getTitle();
-        if (rawTitle == null) return;
-        String title = ChatColor.stripColor(rawTitle);
-        if (!title.startsWith("Players who claimed")) return;
+            event.setCancelled(true);
 
-        event.setCancelled(true);
+            int rawSlot = event.getRawSlot();
+            int topSize = event.getView().getTopInventory().getSize();
+            if (rawSlot < 0 || rawSlot >= topSize) return;
 
-        int rawSlot = event.getRawSlot();
-        int topSize = event.getView().getTopInventory().getSize();
-        if (rawSlot < 0 || rawSlot >= topSize) return;
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked == null || clicked.getType() == Material.AIR) return;
 
-        ItemStack clicked = event.getCurrentItem();
-        if (clicked == null || clicked.getType() == Material.AIR) return;
+            List<Map.Entry<UUID, Timestamp>> entries = new ArrayList<>(myInventory.getClaims().entrySet());
+            int pages = Math.max(1, (int) Math.ceil(entries.size() / (double) myInventory.PAGE_SIZE));
 
-        TreasureCompletedGuiManager.getContext(player.getUniqueId()).ifPresent(ctx -> {
-            List<Map.Entry<UUID, Timestamp>> entries = new ArrayList<>(ctx.claims.entrySet());
-            int pages = Math.max(1, (int) Math.ceil(entries.size() / (double) TreasureCompletedGuiManager.PAGE_SIZE));
-            if (rawSlot == 45 && ctx.page > 1) {
-                ctx.page--;
-                TreasureCompletedGuiManager.open(player, ctx.treasureId, ctx.claims, ctx.page);
+            String displayName = "";
+            if (clicked.hasItemMeta() && clicked.getItemMeta().hasDisplayName()) {
+                displayName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
+            }
+
+            if (clicked.getType() == Material.ARROW && displayName.equalsIgnoreCase("< Previous") && myInventory.getPage() > 1) {
+                int page = myInventory.getPage();
+                myInventory.newPage(plugin, page -1).open(player);
                 return;
             }
-            if (rawSlot == 53 && ctx.page < pages) {
-                ctx.page++;
-                TreasureCompletedGuiManager.open(player, ctx.treasureId, ctx.claims, ctx.page);
+            if (clicked.getType() == Material.ARROW && displayName.equalsIgnoreCase("Next >") && myInventory.getPage() < pages) {
+                int page = myInventory.getPage();
+                myInventory.newPage(plugin, page + 1).open(player);
                 return;
             }
 
@@ -75,7 +77,7 @@ public class TreasureCompletedListener implements Listener {
                     }
                 }
                 String name = clicked.getItemMeta() != null && clicked.getItemMeta().hasDisplayName()
-                        ? ChatColor.stripColor(clicked.getItemMeta().getDisplayName())
+                        ? ChatColor.stripColor(displayName)
                         : MessageUtil.getRaw("generic.unknown");
 
                 MessageUtil.send(player, "completed.detail-title", Map.of("name", name));
@@ -83,13 +85,7 @@ public class TreasureCompletedListener implements Listener {
                     MessageUtil.send(player, "completed.uuid-line", Map.of("uuid", uuid));
                 }
             }
-        });
+        }
     }
 
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
-        if (!(event.getPlayer() instanceof Player)) return;
-        Player player = (Player) event.getPlayer();
-        TreasureCompletedGuiManager.removeContext(player.getUniqueId());
-    }
 }

@@ -2,7 +2,7 @@ package com.github.joaoalberis.treasurehunt.commands;
 
 import com.github.joaoalberis.treasurehunt.TreasureCache;
 import com.github.joaoalberis.treasurehunt.database.DatabaseManager;
-import com.github.joaoalberis.treasurehunt.gui.TreasureGuiManager;
+import com.github.joaoalberis.treasurehunt.gui.list.TreasureListInventory;
 import com.github.joaoalberis.treasurehunt.models.TreasureModel;
 import com.github.joaoalberis.treasurehunt.utils.MessageUtil;
 import org.bukkit.Bukkit;
@@ -52,14 +52,23 @@ public class TreasureList implements TreasureBaseCommand{
             MessageUtil.send(sender, "no-permission");
             return true;
         }
+        int page = 1;
+        if (args.length >= 1) {
+            try {
+                page = Math.max(1, Integer.parseInt(args[0]));
+            } catch (NumberFormatException ignored) {}
+        }
 
         if (sender instanceof Player player) {
+            int finalPage = page;
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     Map<String, TreasureModel> map = dbManager.loadAllTreasures();
                     List<TreasureModel> list = new ArrayList<>(map.values());
-                    Bukkit.getScheduler().runTask(plugin, () ->
-                            TreasureGuiManager.openListGui(player, list, 1));
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        TreasureListInventory inventory = new TreasureListInventory(plugin, list, finalPage);
+                        player.openInventory(inventory.getInventory());
+                    });
                 } catch (SQLException e) {
                     Bukkit.getScheduler().runTask(plugin, () ->
                             MessageUtil.send(player, "generic.error-loading"));
@@ -69,12 +78,6 @@ public class TreasureList implements TreasureBaseCommand{
             return true;
         }
 
-        int page = 1;
-        if (args.length >= 1) {
-            try {
-                page = Math.max(1, Integer.parseInt(args[0]));
-            } catch (NumberFormatException ignored) {}
-        }
 
         try {
             Map<String, TreasureModel> treasures = dbManager.loadAllTreasures();

@@ -2,7 +2,8 @@ package com.github.joaoalberis.treasurehunt.commands;
 
 import com.github.joaoalberis.treasurehunt.TreasureCache;
 import com.github.joaoalberis.treasurehunt.database.DatabaseManager;
-import com.github.joaoalberis.treasurehunt.gui.TreasureGuiManager;
+import com.github.joaoalberis.treasurehunt.gui.delete.TreasureDeleteConfirmInventory;
+import com.github.joaoalberis.treasurehunt.gui.delete.TreasureDeleteInventory;
 import com.github.joaoalberis.treasurehunt.models.TreasureModel;
 import com.github.joaoalberis.treasurehunt.utils.MessageUtil;
 import org.bukkit.Bukkit;
@@ -62,8 +63,10 @@ public class TreasureDelete implements TreasureBaseCommand{
                         Map<String, TreasureModel> map = dbManager.loadAllTreasures();
                         List<TreasureModel> list = new ArrayList<>(map.values());
 
-                        Bukkit.getScheduler().runTask(plugin, () ->
-                                TreasureGuiManager.openDeleteSelection(player, list, 1));
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            TreasureDeleteInventory inventory = new TreasureDeleteInventory(plugin, list, 1);
+                            player.openInventory(inventory.getInventory());
+                        });
                     } catch (SQLException e) {
                         Bukkit.getScheduler().runTask(plugin, () ->
                                 MessageUtil.send(player, "generic.error-loading"));
@@ -93,8 +96,10 @@ public class TreasureDelete implements TreasureBaseCommand{
                         }
 
 
-                        Bukkit.getScheduler().runTask(plugin, () ->
-                                TreasureGuiManager.openConfirmGui(player, model));
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            TreasureDeleteConfirmInventory inventory = new TreasureDeleteConfirmInventory(plugin, model);
+                            player.openInventory(inventory.getInventory());
+                        });
 
                     } catch (SQLException e) {
                         Bukkit.getScheduler().runTask(plugin, () ->

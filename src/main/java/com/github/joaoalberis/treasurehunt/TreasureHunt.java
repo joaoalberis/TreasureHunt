@@ -3,8 +3,10 @@ package com.github.joaoalberis.treasurehunt;
 import com.github.joaoalberis.treasurehunt.commands.TreasureHandler;
 import com.github.joaoalberis.treasurehunt.database.DatabaseManager;
 import com.github.joaoalberis.treasurehunt.events.RightClickTreasure;
-import com.github.joaoalberis.treasurehunt.gui.TreasureCompletedListener;
-import com.github.joaoalberis.treasurehunt.gui.TreasureGuiListener;
+import com.github.joaoalberis.treasurehunt.gui.completed.TreasureCompletedListener;
+import com.github.joaoalberis.treasurehunt.gui.delete.TreasureDeleteConfirmListener;
+import com.github.joaoalberis.treasurehunt.gui.delete.TreasureDeleteListener;
+import com.github.joaoalberis.treasurehunt.gui.list.TreasureListListener;
 import com.github.joaoalberis.treasurehunt.utils.MessageUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -43,8 +45,10 @@ public final class TreasureHunt extends JavaPlugin {
 
     private void registerEvents() {
         getServer().getPluginManager().registerEvents(new RightClickTreasure(this, dbManager, cache), this);
-        getServer().getPluginManager().registerEvents(new TreasureGuiListener(dbManager, this, cache), this);
         getServer().getPluginManager().registerEvents(new TreasureCompletedListener(dbManager, this, cache), this);
+        getServer().getPluginManager().registerEvents(new TreasureListListener(dbManager, this, cache), this);
+        getServer().getPluginManager().registerEvents(new TreasureDeleteListener(dbManager, this, cache), this);
+        getServer().getPluginManager().registerEvents(new TreasureDeleteConfirmListener(dbManager, this, cache), this);
     }
 
     private void registerCommands() {

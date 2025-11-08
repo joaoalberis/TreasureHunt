@@ -2,7 +2,7 @@ package com.github.joaoalberis.treasurehunt.commands;
 
 import com.github.joaoalberis.treasurehunt.TreasureCache;
 import com.github.joaoalberis.treasurehunt.database.DatabaseManager;
-import com.github.joaoalberis.treasurehunt.gui.TreasureCompletedGuiManager;
+import com.github.joaoalberis.treasurehunt.gui.completed.TreasureCompletedInventory;
 import com.github.joaoalberis.treasurehunt.utils.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -66,7 +66,8 @@ public class TreasureCompleted implements TreasureBaseCommand{
                         return;
                     }
 
-                    Bukkit.getScheduler().runTask(plugin, () -> TreasureCompletedGuiManager.open(player, treasureId, claims, 1));
+                    TreasureCompletedInventory inventory = new TreasureCompletedInventory(plugin, treasureId, claims, 1);
+                    Bukkit.getScheduler().runTask(plugin, () -> player.openInventory(inventory.getInventory()));
                 } catch (SQLException ex) {
                     Bukkit.getScheduler().runTask(plugin, () -> MessageUtil.send(player, "generic.error-loading"));
                     plugin.getLogger().log(Level.SEVERE, "SQL error while loading claims with date for treasure " + treasureId, ex);
